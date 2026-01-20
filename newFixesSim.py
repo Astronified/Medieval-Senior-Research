@@ -147,7 +147,7 @@ class Settlement:
 
                 # Only give birth if fed and cooldown is ready
                 if person.monthsUntilNextBirth <= 0 < self.foodstuff:
-                    birth_chance = 0.09 if person.age <= 30 * 12 else (0.05 if person.age <= 35 * 12 else 0.002)
+                    birth_chance = 0.105 if person.age <= 30 * 12 else (0.05 if person.age <= 35 * 12 else 0.002)
 
                     if crowding > 0.8:
                         birth_chance *= (0.8 / crowding)
@@ -295,7 +295,6 @@ class Child:
 averageEndStart = 0.0
 for zzz in range(100):
     newSettlement = Settlement()
-    newSettlement.setLand(200)
     peop = []
     farmcount =0
     for i in range(100):
@@ -383,13 +382,13 @@ for zzz in range(100):
     #
     # plt.tight_layout()
     # #plt.show()
-    if lastPop-firstPop>0:
+    if lastPop-firstPop>-51:
         print("end-start: " + str(lastPop-firstPop))
         averageEndStart += (lastPop-firstPop)
     else:
         print("failed ")
         print("highestPop: " + str(highestPop))
-    print("----------------------")
+    print("---------------------")
 
 print("avg end-start: " + str(averageEndStart/100))
 
