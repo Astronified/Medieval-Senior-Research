@@ -400,5 +400,3 @@ print("avg end-start: " + str(averageEndStart/100))
     # A (300x300 * 2) area's carry capacity is about XYZ
     #4x:
     # A 600x600 area's carry capacity is about XYZ
-
-
