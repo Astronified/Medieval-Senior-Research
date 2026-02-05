@@ -3,7 +3,7 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
-def function_testing(birthChance, deathChance, harvest_std):
+def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
     class Settlement:
         def __init__(self):
             self.population = 0
@@ -78,12 +78,12 @@ def function_testing(birthChance, deathChance, harvest_std):
                     else:
                         foodGainedThisSeason += seasonalMultiplier * (base_production * 0.05)
                 if isinstance(person, Child):
+                    if plots_worked_this_season < self.arable_land and not self.season == "winter":
+                        foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5 #estimated base production
+                if isinstance(person, Clergy)and not self.season == "winter":
                     if plots_worked_this_season < self.arable_land:
                         foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5 #estimated base production
-                if isinstance(person, Clergy):
-                    if plots_worked_this_season < self.arable_land:
-                        foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5 #estimated base production
-                if isinstance(person, Housekeeper):
+                if isinstance(person, Housekeeper)and not self.season == "winter":
                     if plots_worked_this_season < self.arable_land:
                         foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5 #estimated base production
 
@@ -103,7 +103,7 @@ def function_testing(birthChance, deathChance, harvest_std):
                 starvation_chance = min(0.4, abs(self.foodstuff) / len(self.populace))
 
             # 4. INDIVIDUAL LIFE LOOP
-            crowding = len(self.populace) / (self.arable_land * 1.5)
+            crowding = len(self.populace) / (self.arable_land * crowding_factor)
             for person in self.populace[:]:
                 birthDeath = False
                 dying = False
@@ -407,6 +407,6 @@ def function_testing(birthChance, deathChance, harvest_std):
         # A (300x300 * 2) area's carry capacity is about XYZ
         #4x:
         # A 600x600 area's carry capacity is about XYZ
-#print("birth chance: 0.11, death chance: 0.0052")
-#function_testing(0.11,0.0052, 0.5)
-#print("---------------------")
+# print("birth chance: 0.11, death chance: 0.0052")
+# print(function_testing(0.11,0.0052, 0.5, 1.0))
+# print("---------------------")
