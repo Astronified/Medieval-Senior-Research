@@ -99,8 +99,8 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
             starvationDeath = 0
             if self.foodstuff < 0:
                 starvation = True
-                # Cap chance to ensure one bad harvest doesn't wipe everyone instantly
-                starvation_chance = min(0.4, abs(self.foodstuff) / len(self.populace))
+                deficit_ratio = abs(self.foodstuff) / len(self.populace)
+                starvation_chance = min(0.15, deficit_ratio * 0.1)
 
             # 4. INDIVIDUAL LIFE LOOP
             crowding = len(self.populace) / (self.arable_land * crowding_factor)
@@ -146,7 +146,8 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
                         person.monthsUntilNextBirth -= 3
 
                     # Only give birth if fed and cooldown is ready
-                    if person.monthsUntilNextBirth <= 0 < self.foodstuff:
+                    safety_buffer = len(self.populace) * 2
+                    if person.monthsUntilNextBirth <= 0 and self.foodstuff> safety_buffer:
                         birth_chance = birthChance if person.age <= 30 * 12 else (0.05 if person.age <= 35 * 12 else 0.002)
 
                         if crowding > 0.8:
@@ -318,7 +319,7 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
         newSettlement.setRegionalMultiplier(1.1) #this assumes light green region for now
         newSettlement.setPeople(peop)
         newSettlement.setFood(len(peop) * 8)
-        newSettlement.setLand(210)
+        newSettlement.setLand(350)
         #print("we have" + str(farmcount) + " farmers")
 
 

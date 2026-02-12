@@ -34,7 +34,7 @@ def evaluate_setting(params):
         score += (fail_rate * 1000)
 
         # Penalty B: Population Drift (Target 50)
-    target_growth = 50
+    target_growth = 30
     drift_distance = abs(avg_change - target_growth)
     score += (drift_distance ** 2)
 
@@ -58,11 +58,11 @@ def evaluate_setting(params):
 # --- 2. EXECUTION ---
 if __name__ == '__main__':
     # Broad Search Grid
-    birth_options = np.arange(0.08, 0.131, 0.01)
-    death_options = np.arange(0.005, 0.0071, 0.0005)
+    birth_options = np.arange(0.10, 0.151, 0.01)
+    death_options = np.arange(0.005, 0.01, 0.0005)
     harvest_stds = [0.30, 0.40, 0.50]
-    crowding_options = [0.8, 1.0, 1.2, 1.4]
-
+   # crowding_options = [0.8, 1.0, 1.2, 1.4]
+    crowding_options = [0.4, 0.45, 0.50, 0.55]
     grid = list(itertools.product(birth_options, death_options, harvest_stds, crowding_options))
 
     print(f"Starting 4-Variable Baseline HPO on {mp.cpu_count()} cores.")
