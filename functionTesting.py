@@ -404,6 +404,7 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
         #300x300 area is approximately 210 arable land units
         # A 300x300 area's carry capacity is about XYZ
         #occasionally settlements fail
+
         # 2x:
         # A (300x300 * 2) area's carry capacity is about XYZ
         #4x:
