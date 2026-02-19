@@ -270,7 +270,7 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
 
     class Clergy:
         def __init__(self, age=None):
-            self.gender = "male" if random.random() < 0.8 else "female"  # Mostly male clergy?
+            self.gender = "male" if random.random() < 0.8 else "female"  # mostly male clergy (exception nuns)?
             if age:
                 self.age = age
             else:
@@ -299,7 +299,7 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
         newSettlement = Settlement()
         peop = []
         farmcount =0
-        for i in range(100):
+        for i in range(190):
             jobSeed = random.random()
             age = np.random.normal(20,13.75)
             if age < 0:
@@ -319,7 +319,7 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
         newSettlement.setRegionalMultiplier(1.1) #this assumes light green region for now
         newSettlement.setPeople(peop)
         newSettlement.setFood(len(peop) * 8)
-        newSettlement.setLand(350)
+        newSettlement.setLand(450)
         #print("we have" + str(farmcount) + " farmers")
 
 
@@ -408,6 +408,6 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
         # A (300x300 * 2) area's carry capacity is about XYZ
         #4x:
         # A 600x600 area's carry capacity is about XYZ
-# print("birth chance: 0.11, death chance: 0.0052")
-# print(function_testing(0.11,0.0052, 0.5, 1.0))
-# print("---------------------")
+print("birth chance: 0.13, death chance: 0.005, harvest 0.4, crowd 0.3")
+print(function_testing(0.13,0.005, 0.4, 0.4))
+print("---------------------")
