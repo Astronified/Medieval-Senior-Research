@@ -407,7 +407,7 @@ def function_testing(birthChance, deathChance, harvest_std, crowding_factor):
 
         # 2x:
         # A (300x300 * 2) area's carry capacity is about XYZ
-        #4x:
+        #4x:2
         # A 600x600 area's carry capacity is about XYZ
 print("birth chance: 0.13, death chance: 0.005, harvest 0.4, crowd 0.3")
 print(function_testing(0.13,0.005, 0.4, 0.4))
