@@ -10,7 +10,7 @@ MIN_DISTANCE = 300
 TOP_RESULTS = 100
 IMAGE_SIZE = 8192
 RANDOM_VARIATION = 0.05
-2
+
 habitability_scale = [
     ("#d62c20", 0.0),
     ("#db7900", 0.2),
