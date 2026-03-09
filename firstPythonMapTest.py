@@ -415,7 +415,7 @@ worldMap = mapCoordination.WorldMap(map_data[0], map_data[1])
 print(worldMap.get_pixel_value(2000,6000))
 # worldMap.add_settlement(JaxSettlement1, 610, 1791,random.randint(100000, 999999))
 # worldMap.add_settlement(JaxSettlement2, 367, 1791,random.randint(100000, 999999))
-
+#test
 #0.15, 0.0064, 0.4, 0.4 if A<= 400
 #0.14, 0.0060, 0.30, 0.4 if 400 < A < 450
 
