@@ -1,5 +1,7 @@
 import math
 import random
+from contextlib import nullcontext
+
 import numpy as np
 import mapCoordination
 import matplotlib.pyplot as plt
@@ -45,7 +47,16 @@ class Settlement:
 
     def getLand(self):
         return self.arable_land
-
+    def calculateManPower(self):
+        current_manPower = 0.0
+        solider_count = 0
+        for p in self.populace:
+            if p.gender == "male" and not isinstance(p, Solider) and not isinstance(p,Child) and p.age< (50*12):
+                current_manPower +=1.0
+            if isinstance(p, Solider)and p.age< (50*12):
+                current_manPower +=2.5
+                solider_count += 1
+        return current_manPower
     def nextSeason(self):
         seasons = ["spring", "summer", "fall", "winter"]
         idx = seasons.index(self.season)
@@ -97,6 +108,9 @@ class Settlement:
             if isinstance(person, Clergy) and not self.season == "winter":
                 if plots_worked_this_season < self.arable_land:
                     foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5  # estimated base production
+            if isinstance(person, Solider) and not self.season == "winter":
+                if plots_worked_this_season < self.arable_land:
+                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5  # estimated base production
             if isinstance(person, Housekeeper) and not self.season == "winter":
                 if plots_worked_this_season < self.arable_land:
                     foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5  # estimated base production
@@ -128,8 +142,16 @@ class Settlement:
             # --- B. JOB TRANSITIONS (Child -> Adult) ---
             if isinstance(person, Child) and person.age >= 13 * 12:
                 # 4% chance to be Clergy, otherwise Farmer
-                new_job = Clergy(age=person.age) if random.random() > 0.96 else Farmer(gender=person.gender,
-                                                                                       age=person.age)
+                tempr =random.random()
+                new_job=nullcontext
+                if 0.96<tempr<0.98:
+                    new_job = Solider(age=person.age)
+                elif tempr>0.98:
+                    new_job = Clergy(age = person.age)
+                else:
+                     new_job=Farmer(gender=person.gender, age=person.age)
+                # new_job = Solider(age=person.age) if 0.98>random.random() > 0.96 else Farmer(gender=person.gender,
+                #                                                                        age=person.age)
                 self.populace.remove(person)
                 self.populace.append(new_job)
                 continue
@@ -300,7 +322,21 @@ class Clergy:
 
     def doWork(self):
         return 5.0 * self.holiness
+class Solider:
+    def __init__(self, age=None):
+        self.gender = "male"
+        if age:
+            self.age = age
+        else:
+            self.age = random.randint(13, 65) * 12
 
+        self.holiness = random.uniform(0.2, 1.5)
+
+    def aging(self):
+        self.age += 3
+
+    def doWork(self):
+        return 5.0 * self.holiness
 
 class Child:
     def __init__(self, age=0):
@@ -309,6 +345,7 @@ class Child:
 
     def aging(self):
         self.age += 3
+
 
 
 averageEndStart = 0.0
@@ -328,8 +365,9 @@ def createSettlement(landSizeJax, populationSize, regionalMulti):
                 if jobSeed <= 0.9:
                     peop.append(Farmer(age=age * 12))
                     farmcount += 1
-
-                elif jobSeed > 0.90:
+                elif 0.90< jobSeed < 0.97:
+                    peop.append(Solider(age=age*12))
+                elif jobSeed > 0.97:
                     peop.append(Clergy(age=age * 12))
             else:
                 peop.append(Child(age=age * 12))
@@ -384,5 +422,3 @@ print(worldMap.get_pixel_value(2000,6000))
 #0.13, 0.0055, 0.40, 0.4 if 500 < A 600
 
 #0.13, 0.006, 0.4, 0.4 if  700 and above
-
-
