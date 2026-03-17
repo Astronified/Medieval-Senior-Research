@@ -49,7 +49,7 @@ class WorldMap:
         swamp_score = self.calculate_swamp_score(swamp_r, swamp_g, swamp_b)
 
         # The final multiplier is the combined score (0.0 to 1.0)
-        return (hab_score, swamp_score)
+        return hab_score * swamp_score
 
 
     def add_settlement(self, settlement, start_x, start_y, settlement_id):
@@ -57,44 +57,41 @@ class WorldMap:
         settlement.x = start_x
         settlement.y = start_y
         settlement.owned_pixels = []
-
-        # Start the expansion process
         self.expand_territory(settlement_id)
 
     def expand_territory(self, settlement_id):
         settlement = self.settlements[settlement_id]
-        target_pixels = settlement.arable_land * 435  # Convert acres to pixels
-
-        # Priority queue: stores (-value, x, y) so highest value pops first
+        target_pixels = settlement.arable_land * 435
         pq = []
         heapq.heappush(pq, (0, settlement.x, settlement.y))
-
+        addedLand = 0
         claimed_count = len(settlement.owned_pixels)
 
         while pq and claimed_count < target_pixels:
             neg_val, cx, cy = heapq.heappop(pq)
 
-            # If already owned, skip
+            #if already owned skip
             if self.ownership_grid[cy, cx] != -1:
                 continue
-
-            # Claim it
+            #claim it
             self.ownership_grid[cy, cx] = settlement_id
             settlement.owned_pixels.append((cx, cy))
             claimed_count += 1
+            addedLand+=1
 
-            # Add neighbors to queue (Up, Down, Left, Right)
+
             neighbors = [(cx, cy - 1), (cx, cy + 1), (cx - 1, cy), (cx + 1, cy)]
             for nx, ny in neighbors:
                 if 0 <= nx < self.width and 0 <= ny < self.height:
                     if self.ownership_grid[ny, nx] == -1:
                         val = self.get_pixel_value(nx, ny)
-                        # Push negative value because heapq is a min-heap
                         heapq.heappush(pq, (-val, nx, ny))
+        return [claimed_count, addedLand]
+
 
     def calculate_habitability_score(self, r, g, b):
         """stupid thing that likes to break"""
-        print("habit: " + str(r) + ", " + str(g)+ ", " + str(b))
+       # print("habit: " + str(r) + ", " + str(g)+ ", " + str(b))
         habitability_scale = [
             (np.array([214, 44, 32]), 0.01),  # #d62c20
             (np.array([219, 121, 0]), 0.2),  # #db7900
@@ -119,7 +116,7 @@ class WorldMap:
     def calculate_swamp_score(self, r, g, b):
         """Penalizes pixels that are too close to the bad swamp color."""
         # BAD_SWAMP_COLOR = "#18400b"
-        print("swamp:" + str(r) + ", " + str(g)+ ", " + str(b))
+        #print("swamp:" + str(r) + ", " + str(g)+ ", " + str(b))
         target_rgb = np.array([r, g, b], dtype=float)
         bad_color = np.array([24, 64, 11], dtype=float)
 

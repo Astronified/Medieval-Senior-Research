@@ -407,13 +407,27 @@ def advanceOneSeason(settlement):
         # A (300x300 * 2) area's carry capacity is about XYZ
         #4x:2
         # A 600x600 area's carry capacity is about XYZ
-JaxSettlement1 = createSettlement(580, 125, 1.2)
+JaxSettlement1 = createSettlement(50, 125, 1.2)
 JaxSettlement2 = createSettlement(600, 125, 1.2)
 JaxSettlement3 = createSettlement(500, 105, 1.2)
 map_data = mapCoordination.load_map_data("riverTest.png", "testFast2.png")
 worldMap = mapCoordination.WorldMap(map_data[0], map_data[1])
-print(worldMap.get_pixel_value(30,0))
-# worldMap.add_settlement(JaxSettlement1, 610, 1791,random.randint(100000, 999999))
+print(worldMap.get_pixel_value(1897, 5199,))
+worldMap.add_settlement(JaxSettlement1,1897,5199, 123456789)
+print("current starup land is (none claimed currently): ")
+print(JaxSettlement1.getLand())
+print("land claimed: ")
+output = worldMap.expand_territory(123456789)
+print(output[0])
+print("adding 10")
+JaxSettlement1.setLand(JaxSettlement1.getLand()+10)
+print(JaxSettlement1.getLand())
+output = worldMap.expand_territory(123456789)
+print("total land: ")
+print(output[0])
+print("added land: ")
+print(output[1])
+# worldMap.=dd_settlement(JaxSettlement1, 610, 1791,random.randint(100000, 999999))
 # worldMap.add_settlement(JaxSettlement2, 367, 1791,random.randint(100000, 999999))
 #test
 #0.15, 0.0064, 0.4, 0.4 if A<= 400
