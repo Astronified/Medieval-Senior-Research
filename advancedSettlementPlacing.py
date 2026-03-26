@@ -111,6 +111,8 @@ def mian():
     print(finalls[0])
     print(finalls[1])
     print(finalls[2])
+#need to be at least  2500 pixels apart, MINIMUM
+
 
     return [finalls[0],finalls[1],finalls[2]] #3 for testing atm
 

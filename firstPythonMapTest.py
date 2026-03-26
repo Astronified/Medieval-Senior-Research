@@ -4,8 +4,9 @@ from contextlib import nullcontext
 
 import numpy as np
 import mapCoordination
+import simulationManager as simulation_manager
 import matplotlib.pyplot as plt
-
+import advancedSettlementPlacing
 
 class Settlement:
     def __init__(self):
@@ -325,6 +326,7 @@ class Clergy:
 class Solider:
     def __init__(self, age=None):
         self.gender = "male"
+        self.spouse = None
         if age:
             self.age = age
         else:
@@ -407,26 +409,26 @@ def advanceOneSeason(settlement):
         # A (300x300 * 2) area's carry capacity is about XYZ
         #4x:2
         # A 600x600 area's carry capacity is about XYZ
-JaxSettlement1 = createSettlement(50, 125, 1.2)
-JaxSettlement2 = createSettlement(600, 125, 1.2)
-JaxSettlement3 = createSettlement(500, 105, 1.2)
-map_data = mapCoordination.load_map_data("riverTest.png", "testFast2.png")
-worldMap = mapCoordination.WorldMap(map_data[0], map_data[1])
-print(worldMap.get_pixel_value(1897, 5199,))
-worldMap.add_settlement(JaxSettlement1,1897,5199, 123456789)
-print("current starup land is (none claimed currently): ")
-print(JaxSettlement1.getLand())
-print("land claimed: ")
-output = worldMap.expand_territory(123456789)
-print(output[0])
-print("adding 10")
-JaxSettlement1.setLand(JaxSettlement1.getLand()+10)
-print(JaxSettlement1.getLand())
-output = worldMap.expand_territory(123456789)
-print("total land: ")
-print(output[0])
-print("added land: ")
-print(output[1])
+# JaxSettlement1 = createSettlement(50, 125, 1.2)
+# JaxSettlement2 = createSettlement(600, 125, 1.2)
+# JaxSettlement3 = createSettlement(500, 105, 1.2)
+# map_data = mapCoordination.load_map_data("riverTest.png", "testFast2.png")
+# worldMap = mapCoordination.WorldMap(map_data[0], map_data[1])
+# print(worldMap.get_pixel_value(1897, 5199,))
+# worldMap.add_settlement(JaxSettlement1,1897,5199, 123456789)
+# print("current starup land is (none claimed currently): ")
+# print(JaxSettlement1.getLand())
+# print("land claimed: ")
+# output = worldMap.expand_territory(123456789)
+# print(output[0])
+# print("adding 10")
+# JaxSettlement1.setLand(JaxSettlement1.getLand()+10)
+# print(JaxSettlement1.getLand())
+# output = worldMap.expand_territory(123456789)
+# print("total land: ")
+# print(output[0])
+# print("added land: ")
+# print(output[1])
 # worldMap.=dd_settlement(JaxSettlement1, 610, 1791,random.randint(100000, 999999))
 # worldMap.add_settlement(JaxSettlement2, 367, 1791,random.randint(100000, 999999))
 #test
@@ -436,3 +438,51 @@ print(output[1])
 #0.13, 0.0055, 0.40, 0.4 if 500 < A 600
 
 #0.13, 0.006, 0.4, 0.4 if  700 and above
+
+# Load map
+map_data = mapCoordination.load_map_data("riverTest.png", "testFast2.png")
+world_map = mapCoordination.WorldMap(map_data[0], map_data[1])
+
+# Create simulation
+sim = simulation_manager.SimulationManager(world_map)
+monitor = simulation_manager.SimulationMonitor(sim)
+best_three = advancedSettlementPlacing.mian()
+print(best_three)
+river_id = sim.create_settlement({
+    'name': "Jax's settlement",
+    'land': 1500,
+    'population': 200,
+    'regional_multiplier': 1.3,
+    'spawn_x': best_three[0][1],
+    'spawn_y': best_three[0][2]
+})
+
+test_id = sim.create_settlement({
+    'name': "Eric's settlement",
+    'land': 1500,
+    'population': 200,
+    'regional_multiplier': 0.9,
+    'spawn_x': best_three[1][1],
+    'spawn_y': best_three[1][2]
+})
+
+greenfield_id = sim.create_settlement({
+    'name': "Kohlen's settlement",
+    'land': 1500,
+    'population': 200,
+    'regional_multiplier': 1.5,
+    'spawn_x': best_three[2][1],
+    'spawn_y': best_three[2][2]
+})
+
+for i in range(200):  # 200 seasons = 50 years
+    sim.advance_all_settlements()
+    if sim.total_seasons_passed % 4 == 0:
+        monitor.take_snapshot()
+
+    if sim.total_seasons_passed % 40 == 0:
+        monitor.print_status()
+
+monitor.print_status(detailed=True)
+monitor.plot_population_over_time(save_path='population_chart.png')
+monitor.generate_report('simulation_report.txt')
