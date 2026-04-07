@@ -18,12 +18,11 @@ class Settlement:
         self.peopleDied = 0
         self.regionMultiplier = 1
         self.birthChance = 0
-        self.harvest_std =0
+        self.harvest_std = 0
         self.deathChance = 0
         self.season = "spring"
         self.jobs = ["Farmer", "Clergy", "Solider", "Tavern", "Speciality",
                      "Blacksmith", "Mason", "Butcher", "Housekeeper", "Prostitute", "Child", "Merchant", "Lord"]
-
         self.arable_land = 200
         self.land_expansion_rate = 0.05
 
@@ -36,28 +35,31 @@ class Settlement:
 
     def setFood(self, food):
         self.foodstuff = food
+
     def setBirth(self, birth):
         self.birthChance = birth
+
     def setHarvest_std(self, harvstd):
         self.harvest_std = harvstd
-    def setDeath(self,death):
-        self.deathChance=death
+
+    def setDeath(self, death):
+        self.deathChance = death
 
     def setLand(self, landsize):
         self.arable_land = landsize
 
     def getLand(self):
         return self.arable_land
+
     def calculateManPower(self):
         current_manPower = 0.0
-        solider_count = 0
         for p in self.populace:
-            if p.gender == "male" and not isinstance(p, Solider) and not isinstance(p,Child) and p.age< (50*12):
-                current_manPower +=1.0
-            if isinstance(p, Solider)and p.age< (50*12):
-                current_manPower +=2.5
-                solider_count += 1
+            if p.gender == "male" and not isinstance(p, Solider) and not isinstance(p, Child) and p.age < (50 * 12):
+                current_manPower += 1.0
+            if isinstance(p, Solider) and p.age < (50 * 12):
+                current_manPower += 2.5
         return current_manPower
+
     def nextSeason(self):
         seasons = ["spring", "summer", "fall", "winter"]
         idx = seasons.index(self.season)
@@ -65,33 +67,26 @@ class Settlement:
 
     def attempt_marriage(self):
         eligible = [p for p in self.populace if
-                    not isinstance(p, Child) and not isinstance(p,
-                                                                Clergy) and p.spouse is None and 17 * 12 <= p.age <= 55 * 12]
-
-        bachelors = [p for p in eligible if p.gender == "male"]
+                    not isinstance(p, Child) and not isinstance(p, Clergy)
+                    and p.spouse is None and 17 * 12 <= p.age <= 55 * 12]
+        bachelors    = [p for p in eligible if p.gender == "male"]
         bachelorettes = [p for p in eligible if p.gender == "female"]
-
         random.shuffle(bachelors)
         random.shuffle(bachelorettes)
-
         while bachelors and bachelorettes:
             groom = bachelors.pop()
             bride = bachelorettes.pop()
-            if random.random() < 0.5:  # Increased chance to marry if eligible
+            if random.random() < 0.5:
                 groom.spouse = bride
                 bride.spouse = groom
 
     def passOneSeason(self):
-        # 1. SETUP AND SEASONAL VARIANCE
-        # FIX: Clamp the multiplier so it never goes below 0.1 (prevent negative food)
-        raw_multiplier = np.random.normal(1.8, self.harvest_std)
+        raw_multiplier   = np.random.normal(1.8, self.harvest_std)
         seasonalMultiplier = max(0.1, raw_multiplier) * self.regionMultiplier
-
         foodGainedThisSeason = 0
-        deadCount = 0
+        deadCount  = 0
         babiesBorn = 0
 
-        # 2. HARVEST PHASE
         random.shuffle(self.populace)
         plots_worked_this_season = 0
 
@@ -104,132 +99,95 @@ class Settlement:
                 else:
                     foodGainedThisSeason += seasonalMultiplier * (base_production * 0.05)
             if isinstance(person, Child):
-                if plots_worked_this_season < self.arable_land and not self.season == "winter":
-                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5  # estimated base production
-            if isinstance(person, Clergy) and not self.season == "winter":
+                if plots_worked_this_season < self.arable_land and self.season != "winter":
+                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5
+            if isinstance(person, Clergy) and self.season != "winter":
                 if plots_worked_this_season < self.arable_land:
-                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5  # estimated base production
-            if isinstance(person, Solider) and not self.season == "winter":
+                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5
+            if isinstance(person, Solider) and self.season != "winter":
                 if plots_worked_this_season < self.arable_land:
-                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5  # estimated base production
-            if isinstance(person, Housekeeper) and not self.season == "winter":
+                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5
+            if isinstance(person, Housekeeper) and self.season != "winter":
                 if plots_worked_this_season < self.arable_land:
-                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5  # estimated base production
+                    foodGainedThisSeason += seasonalMultiplier * 0.3 * 1.5
 
         self.foodstuff += foodGainedThisSeason
-        #  print("foodstuff:" + str(self.foodstuff))
-        # 3. CONSUMPTION
         self.foodstuff -= len(self.populace)
-        # if self.foodstuff <0:
-        #     print("starvation: " + str(self.foodstuff))
-        # Starvation Logic
+
         starvation_chance = 0.0
-        starvation = False
-        starvationDeath = 0
+        starvationDeath   = 0
         if self.foodstuff < 0:
-            starvation = True
-            deficit_ratio = abs(self.foodstuff) / len(self.populace)
+            deficit_ratio     = abs(self.foodstuff) / len(self.populace)
             starvation_chance = min(0.15, deficit_ratio * 0.1)
 
-        # 4. INDIVIDUAL LIFE LOOP
-        crowding = len(self.populace) / (self.arable_land * 0.4) #crowding_factor
+        crowding = len(self.populace) / (self.arable_land * 0.4)
+
         for person in self.populace[:]:
             birthDeath = False
-            dying = False
+            dying      = False
 
-            # --- A. AGING ---
             person.aging()
 
-            # --- B. JOB TRANSITIONS (Child -> Adult) ---
             if isinstance(person, Child) and person.age >= 13 * 12:
-                # 4% chance to be Clergy, otherwise Farmer
-                tempr =random.random()
-                new_job=nullcontext
-                if 0.96<tempr<0.98:
+                tempr = random.random()
+                if 0.96 < tempr < 0.98:
                     new_job = Solider(age=person.age)
-                elif tempr>0.98:
-                    new_job = Clergy(age = person.age)
+                elif tempr > 0.98:
+                    new_job = Clergy(age=person.age)
                 else:
-                     new_job=Farmer(gender=person.gender, age=person.age)
-                # new_job = Solider(age=person.age) if 0.98>random.random() > 0.96 else Farmer(gender=person.gender,
-                #                                                                        age=person.age)
+                    new_job = Farmer(gender=person.gender, age=person.age)
                 self.populace.remove(person)
                 self.populace.append(new_job)
                 continue
 
-            # --- C. MOTHERHOOD LOGIC (Return to Work) ---
-            # Only return to work if NOT pregnant/nursing a new baby
             if isinstance(person, Housekeeper) and person.monthsSinceLastBirth > (2.1 * 12):
                 back_to_farmer = Farmer(gender="female", age=person.age)
-                # Restore pointers
                 back_to_farmer.spouse = person.spouse
                 back_to_farmer.monthsUntilNextBirth = person.monthsUntilNextBirth
-
-                # Update husband's pointer to the new Farmer object
                 if person.spouse:
                     person.spouse.spouse = back_to_farmer
-
                 self.populace.remove(person)
                 self.populace.append(back_to_farmer)
-                # Update local reference so birth logic below uses the Farmer object
                 person = back_to_farmer
 
-            # --- D. BIRTH LOGIC ---
             if (isinstance(person, Farmer) or isinstance(person, Housekeeper)) and \
                     person.gender == "female" and person.spouse is not None and \
                     17 * 12 <= person.age <= 45 * 12:
-
                 if person.monthsUntilNextBirth > 0:
                     person.monthsUntilNextBirth -= 3
-
-                # Only give birth if fed and cooldown is ready
                 safety_buffer = len(self.populace) * 2
                 if person.monthsUntilNextBirth <= 0 and self.foodstuff > safety_buffer:
                     birth_chance = self.birthChance if person.age <= 30 * 12 else (0.05 if person.age <= 35 * 12 else 0.002)
-
                     if crowding > 0.8:
                         birth_chance *= (0.8 / crowding)
-
                     if random.random() < birth_chance:
                         new_baby = Child()
                         self.populace.append(new_baby)
                         babiesBorn += 1
                         self.childrenBorn += 1
-
-                        # Reset cooldown for next child
                         person.monthsUntilNextBirth = random.randint(18, 24)
-
-                        # Logic Split:
-                        # 1. If Farmer, become Housekeeper.
-                        # 2. If already Housekeeper, RESET timer (fix for the bug).
                         if isinstance(person, Farmer):
                             new_mother = Housekeeper(age=person.age)
                             new_mother.spouse = person.spouse
                             new_mother.monthsUntilNextBirth = person.monthsUntilNextBirth
                             new_mother.monthsSinceLastBirth = 0
-
                             if person.spouse:
                                 person.spouse.spouse = new_mother
-
                             self.populace.remove(person)
                             self.populace.append(new_mother)
                         elif isinstance(person, Housekeeper):
                             person.monthsSinceLastBirth = 0
-
-                        # Maternal Mortality
                         if random.random() < 0.015:
                             birthDeath = True
 
-            # --- E. DEATH LOGIC ---
             if birthDeath:
                 dying = True
-
             if not dying and self.foodstuff < 0:
                 if random.random() < starvation_chance:
                     starvationDeath += 1
                     dying = True
-                    if isinstance(person, Child): self.childrenDied += 1
-
+                    if isinstance(person, Child):
+                        self.childrenDied += 1
             if not dying:
                 if person.age > 50 * 12:
                     if random.random() < (person.age - 50 * 12) / (20 * 12) * 0.1:
@@ -237,7 +195,6 @@ class Settlement:
                 death_rate = self.deathChance if not isinstance(person, Child) else 0.006
                 if random.random() < death_rate:
                     dying = True
-
             if dying:
                 if hasattr(person, 'spouse') and person.spouse:
                     person.spouse.spouse = None
@@ -246,9 +203,7 @@ class Settlement:
                     deadCount += 1
                     self.peopleDied += 1
 
-        # 5. END OF SEASON CLEANUP
         if self.foodstuff > 0:
-            # decay
             self.foodstuff -= int(self.foodstuff * 0.009)
         else:
             self.foodstuff = 0
@@ -257,37 +212,24 @@ class Settlement:
         self.nextSeason()
 
 
-#     print("STARVATION DEATHS" + str(starvationDeath))
-
-# --- JOBS CLASSES ---
+# ── JOB CLASSES ──────────────────────────────────────────────────────────────
 
 class Farmer:
     def __init__(self, gender=None, age=None):
-        # Allow passing gender/age for when children grow up or jobs change
-        if gender:
-            self.gender = gender
-        else:
-            self.gender = "male" if random.random() < 0.5 else "female"
-
-        if age:
-            self.age = age
-        else:
-            self.age = random.randint(13, 50) * 12
-
+        self.gender = gender if gender else ("male" if random.random() < 0.5 else "female")
+        self.age    = age    if age    else random.randint(13, 50) * 12
         self.spouse = None
-        self.monthsUntilNextBirth = 0  # Cooldown
+        self.monthsUntilNextBirth = 0
         self.efficiency = random.uniform(0.5, 1.5)
 
     def aging(self):
         self.age += 3
 
     def doWork(self, season):
-        # Only work if not winter
         if season == "fall":
             return 2.5 * self.efficiency
-
         elif season in ["spring", "summer"]:
-            return 1 * self.efficiency
+            return 1.0 * self.efficiency
         else:
             return 0.25
 
@@ -295,10 +237,10 @@ class Farmer:
 class Housekeeper:
     def __init__(self, age):
         self.gender = "female"
-        self.age = age
+        self.age    = age
         self.spouse = None
-        self.monthsUntilNextBirth = 0  # Cooldown
-        self.monthsSinceLastBirth = 0  # Tracker to return to work
+        self.monthsUntilNextBirth  = 0
+        self.monthsSinceLastBirth  = 0
 
     def aging(self):
         self.age += 3
@@ -310,12 +252,8 @@ class Housekeeper:
 
 class Clergy:
     def __init__(self, age=None):
-        self.gender = "male" if random.random() < 0.8 else "female"  # mostly male clergy (exception nuns)?
-        if age:
-            self.age = age
-        else:
-            self.age = random.randint(13, 65) * 12
-
+        self.gender  = "male" if random.random() < 0.8 else "female"
+        self.age     = age if age else random.randint(13, 65) * 12
         self.holiness = random.uniform(0.2, 1.5)
 
     def aging(self):
@@ -323,15 +261,13 @@ class Clergy:
 
     def doWork(self):
         return 5.0 * self.holiness
+
+
 class Solider:
     def __init__(self, age=None):
-        self.gender = "male"
-        self.spouse = None
-        if age:
-            self.age = age
-        else:
-            self.age = random.randint(13, 65) * 12
-
+        self.gender  = "male"
+        self.spouse  = None
+        self.age     = age if age else random.randint(13, 65) * 12
         self.holiness = random.uniform(0.2, 1.5)
 
     def aging(self):
@@ -339,150 +275,91 @@ class Solider:
 
     def doWork(self):
         return 5.0 * self.holiness
+
 
 class Child:
     def __init__(self, age=0):
-        self.age = age  # Default 0 for newborns
+        self.age    = age
         self.gender = "male" if random.random() < 0.5 else "female"
 
     def aging(self):
         self.age += 3
 
 
-
-averageEndStart = 0.0
-failed = 0.0
-
+# ── FACTORY ──────────────────────────────────────────────────────────────────
 
 def createSettlement(landSizeJax, populationSize, regionalMulti):
     newSettlement = Settlement()
     peop = []
-    farmcount = 0
     for i in range(populationSize):
-            jobSeed = random.random()
-            age = np.random.normal(20, 13.75)
-            if age < 0:
-                age = 0
-            if age > 12:
-                if jobSeed <= 0.9:
-                    peop.append(Farmer(age=age * 12))
-                    farmcount += 1
-                elif 0.90< jobSeed < 0.97:
-                    peop.append(Solider(age=age*12))
-                elif jobSeed > 0.97:
-                    peop.append(Clergy(age=age * 12))
+        jobSeed = random.random()
+        age     = np.random.normal(20, 13.75)
+        if age < 0:
+            age = 0
+        if age > 12:
+            if jobSeed <= 0.9:
+                peop.append(Farmer(age=age * 12))
+            elif 0.90 < jobSeed < 0.97:
+                peop.append(Solider(age=age * 12))
             else:
-                peop.append(Child(age=age * 12))
-                newSettlement.childrenBorn += 1
+                peop.append(Clergy(age=age * 12))
+        else:
+            peop.append(Child(age=age * 12))
+            newSettlement.childrenBorn += 1
 
     newSettlement.setRegionalMultiplier(regionalMulti)
     newSettlement.setPeople(peop)
     newSettlement.setFood(len(peop) * 8)
     newSettlement.setLand(landSizeJax)
     return newSettlement
-    #One arable land = ~430 pixels (should be mapped in furrows)
-    #300x300 area is approximately 210 arable land units
-    # A 300x300 area's carry capacity is about XYZ
-    #occasionally settlements fail
 
 
 def advanceOneSeason(settlement):
     settlement.passOneSeason()
-    if settlement.getLand() <= 400:
-        settlement.setFood(0.13)
-        settlement.setDeath(0.006)
-        settlement.setHarvest_std(0.4)
-    elif 400< settlement.getLand() <= 450:
-        settlement.setFood(0.14)
-        settlement.setDeath(0.006)
-        settlement.setHarvest_std(0.3)
-    elif 450 < settlement.getLand() <= 600:
-        settlement.setFood(0.13)
-        settlement.setDeath(0.0055)
-        settlement.setHarvest_std(0.4)
-    elif settlement.getLand() > 600:
-        settlement.setFood(0.13)
-        settlement.setDeath(0.006)
-        settlement.setHarvest_std(0.4)
+    land = settlement.getLand()
+    if land <= 400:
+        settlement.setBirth(0.13);  settlement.setDeath(0.006); settlement.setHarvest_std(0.4)
+    elif land <= 450:
+        settlement.setBirth(0.14);  settlement.setDeath(0.006); settlement.setHarvest_std(0.3)
+    elif land <= 600:
+        settlement.setBirth(0.13);  settlement.setDeath(0.0055); settlement.setHarvest_std(0.4)
+    else:
+        settlement.setBirth(0.13);  settlement.setDeath(0.006); settlement.setHarvest_std(0.4)
 
-        # 2x:
-        # A (300x300 * 2) area's carry capacity is about XYZ
-        #4x:2
-        # A 600x600 area's carry capacity is about XYZ
-# JaxSettlement1 = createSettlement(50, 125, 1.2)
-# JaxSettlement2 = createSettlement(600, 125, 1.2)
-# JaxSettlement3 = createSettlement(500, 105, 1.2)
-# map_data = mapCoordination.load_map_data("riverTest.png", "testFast2.png")
-# worldMap = mapCoordination.WorldMap(map_data[0], map_data[1])
-# print(worldMap.get_pixel_value(1897, 5199,))
-# worldMap.add_settlement(JaxSettlement1,1897,5199, 123456789)
-# print("current starup land is (none claimed currently): ")
-# print(JaxSettlement1.getLand())
-# print("land claimed: ")
-# output = worldMap.expand_territory(123456789)
-# print(output[0])
-# print("adding 10")
-# JaxSettlement1.setLand(JaxSettlement1.getLand()+10)
-# print(JaxSettlement1.getLand())
-# output = worldMap.expand_territory(123456789)
-# print("total land: ")
-# print(output[0])
-# print("added land: ")
-# print(output[1])
-# worldMap.=dd_settlement(JaxSettlement1, 610, 1791,random.randint(100000, 999999))
-# worldMap.add_settlement(JaxSettlement2, 367, 1791,random.randint(100000, 999999))
-#test
-#0.15, 0.0064, 0.4, 0.4 if A<= 400
-#0.14, 0.0060, 0.30, 0.4 if 400 < A < 450
 
-#0.13, 0.0055, 0.40, 0.4 if 500 < A 600
+# ── STANDALONE ENTRY POINT (not run on import) ────────────────────────────────
 
-#0.13, 0.006, 0.4, 0.4 if  700 and above
+if __name__ == "__main__":
+    map_data  = mapCoordination.load_map_data("riverTest.png", "testFast2.png")
+    world_map = mapCoordination.WorldMap(map_data[0], map_data[1])
+    sim       = simulation_manager.SimulationManager(world_map)
+    monitor   = simulation_manager.SimulationMonitor(sim)
+    best_three = advancedSettlementPlacing.mian()
+    print(best_three)
 
-# Load map
-map_data = mapCoordination.load_map_data("riverTest.png", "testFast2.png")
-world_map = mapCoordination.WorldMap(map_data[0], map_data[1])
+    river_id = sim.create_settlement({
+        'name': "Jax's settlement",
+        'land': 1500, 'population': 200, 'regional_multiplier': 1.3,
+        'spawn_x': best_three[0][1], 'spawn_y': best_three[0][2]
+    })
+    test_id = sim.create_settlement({
+        'name': "Eric's settlement",
+        'land': 1500, 'population': 200, 'regional_multiplier': 0.9,
+        'spawn_x': best_three[1][1], 'spawn_y': best_three[1][2]
+    })
+    greenfield_id = sim.create_settlement({
+        'name': "Kohlen's settlement",
+        'land': 1500, 'population': 200, 'regional_multiplier': 1.5,
+        'spawn_x': best_three[2][1], 'spawn_y': best_three[2][2]
+    })
 
-# Create simulation
-sim = simulation_manager.SimulationManager(world_map)
-monitor = simulation_manager.SimulationMonitor(sim)
-best_three = advancedSettlementPlacing.mian()
-print(best_three)
-river_id = sim.create_settlement({
-    'name': "Jax's settlement",
-    'land': 1500,
-    'population': 200,
-    'regional_multiplier': 1.3,
-    'spawn_x': best_three[0][1],
-    'spawn_y': best_three[0][2]
-})
+    for i in range(200):
+        sim.advance_all_settlements()
+        if sim.total_seasons_passed % 4 == 0:
+            monitor.take_snapshot()
+        if sim.total_seasons_passed % 40 == 0:
+            monitor.print_status()
 
-test_id = sim.create_settlement({
-    'name': "Eric's settlement",
-    'land': 1500,
-    'population': 200,
-    'regional_multiplier': 0.9,
-    'spawn_x': best_three[1][1],
-    'spawn_y': best_three[1][2]
-})
-
-greenfield_id = sim.create_settlement({
-    'name': "Kohlen's settlement",
-    'land': 1500,
-    'population': 200,
-    'regional_multiplier': 1.5,
-    'spawn_x': best_three[2][1],
-    'spawn_y': best_three[2][2]
-})
-
-for i in range(200):  # 200 seasons = 50 years
-    sim.advance_all_settlements()
-    if sim.total_seasons_passed % 4 == 0:
-        monitor.take_snapshot()
-
-    if sim.total_seasons_passed % 40 == 0:
-        monitor.print_status()
-
-monitor.print_status(detailed=True)
-monitor.plot_population_over_time(save_path='population_chart.png')
-monitor.generate_report('simulation_report.txt')
+    monitor.print_status(detailed=True)
+    monitor.plot_population_over_time(save_path='population_chart.png')
+    monitor.generate_report('simulation_report.txt')

@@ -304,4 +304,6 @@ for menu in (main_menu, load_menu, options_menu):
 
 background = Entity(parent=menu_parent, model='quad', texture='shore', scale=(camera.aspect_ratio,1), color=color.gray, z=1, world_y=0)
 background.texture="middleAges2"
+print("About to run app")
 app.run()
+print("App closed")

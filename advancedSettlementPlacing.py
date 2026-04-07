@@ -108,13 +108,36 @@ def mian():
             finalls.append(ranked_by_river[item])
      #   print(f"  Dist: {item[0]:.2f}, X: {item[1]}, Y: {item[2]} (Original Rank: {item[3]})")
     finalls.sort(key=lambda x: x[3])
-    print(finalls[0])
-    print(finalls[1])
-    print(finalls[2])
+
+    import math
+
+    def euclidean_dist(a, b):
+        return math.sqrt((a[1] - b[1]) ** 2 + (a[2] - b[2]) ** 2)
+
+    # After sorting finalls by original rank:
+    finalls.sort(key=lambda x: x[3])
+
+    MIN_DIST = 2500
+    selected = []
+
+    for candidate in finalls:
+        # Check this candidate against all already-selected points
+        too_close = any(euclidean_dist(candidate, chosen) < MIN_DIST for chosen in selected)
+        if not too_close:
+            selected.append(candidate)
+        if len(selected) == 3:
+            break
+
+    if len(selected) < 3:
+        print(f"Warning: Only found {len(selected)} settlements satisfying the 2500px spacing constraint.")
+
+    print(selected)
+
+    return selected
 #need to be at least  2500 pixels apart, MINIMUM
-
-
-    return [finalls[0],finalls[1],finalls[2]] #3 for testing atm
+    #
+    #
+    # return [finalls[0],finalls[1],finalls[2]] #3 for testing atm
 
 
 # if __name__ == "__main__":
