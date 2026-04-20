@@ -480,7 +480,7 @@ def run_simulation(settlement_configs, status_text):
             'is_active'      : True,
         }
 
-    for i in range(1600):
+    for i in range(4800):
         sim.advance_all_settlements()
         if sim.total_seasons_passed % 4 == 0:
             monitor.take_snapshot()
