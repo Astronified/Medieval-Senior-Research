@@ -1,9 +1,9 @@
 SIMULATION REPORT
 ============================================================
 
-Simulation Duration: 1200 years
-Total Seasons: 4800
-Final Year: 2200
+Simulation Duration: 1000 years
+Total Seasons: 4000
+Final Year: 2000
 
 SETTLEMENTS:
 ------------------------------------------------------------
@@ -11,24 +11,24 @@ SETTLEMENTS:
 Settlement 1 (ID: 1000)
   Founded: 1000 (spring)
   Status: ACTIVE
-  Final Population: 592
-  Total Births: 19,439
-  Total Deaths: 18,880
+  Final Population: 667
+  Total Births: 18,352
+  Total Deaths: 17,813
   Territory: 652,500 pixels
 
 Settlement 2 (ID: 1001)
   Founded: 1000 (spring)
   Status: ACTIVE
-  Final Population: 595
-  Total Births: 18,001
-  Total Deaths: 17,444
+  Final Population: 694
+  Total Births: 18,655
+  Total Deaths: 18,102
   Territory: 652,500 pixels
 
 Settlement 3 (ID: 1002)
   Founded: 1000 (spring)
   Status: ACTIVE
-  Final Population: 326
-  Total Births: 3,767
-  Total Deaths: 3,470
+  Final Population: 608
+  Total Births: 17,803
+  Total Deaths: 17,336
   Territory: 652,500 pixels
 
